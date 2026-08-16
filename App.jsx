@@ -73,25 +73,33 @@ const App = () => {
     setIsLoadingAi(true);
     setAiResponse('');
 
-    setTimeout(() => {
-      const mockResponse = `
-**Analysis for: "${prompt}"**
+    try {
+      const response = await fetch('http://localhost:3001/api/generate-insight', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ prompt }),
+      });
 
-Based on current performance telemetry, here are three actionable strategies to improve search ranking and user engagement for this query cluster:
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'An unknown error occurred.');
+      }
 
-*   **Content Deepening & Rich Snippets:**
-    *   The existing content for this topic is high-level. We should create a detailed guide or technical tutorial.
-    *   Implement \`HowTo\` and \`FAQPage\` schema.org structured data to capture rich snippets in search results, which can increase CTR by up to 30%.
+      const data = await response.json();
+      const resultText = data.candidates?.[0]?.content?.parts?.[0]?.text;
 
-*   **Internal Linking Architecture:**
-    *   Identify 3-5 high-authority pages on \`chromeos.dev\` and add contextual links to the target page.
-
-*   **Performance Optimization (Core Web Vitals):**
-    *   The associated page has a "Needs Improvement" Core Web Vitals score. Defer non-critical CSS and compress images to improve LCP.
-`;
-      setAiResponse(mockResponse);
+      if (resultText) {
+        setAiResponse(resultText);
+      } else {
+        setAiResponse("Unable to retrieve Gemini AI insights. Standard telemetry active.");
+      }
+    } catch (err) {
+      setAiResponse(`**Error:** Could not connect to the AGI service. \n\n* **Details:** ${err.message}\n* **Action:** Please ensure the backend server is running and the API key is configured correctly.`);
+    } finally {
       setIsLoadingAi(false);
-    }, 1500);
+    }
   };
 
   const handleAnalyzeQuery = (q) => {
