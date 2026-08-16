@@ -39,6 +39,7 @@ const App = () => {
   const [queryPrompt, setQueryPrompt] = useState('');
   const [aiResponse, setAiResponse] = useState('');
   const [isLoadingAi, setIsLoadingAi] = useState(false);
+  const [analyzingQueryId, setAnalyzingQueryId] = useState(null);
 
   // Realtime Simulation Timer
   useEffect(() => {
@@ -99,13 +100,15 @@ const App = () => {
       setAiResponse(`**Error:** Could not connect to the AGI service. \n\n* **Details:** ${err.message}\n* **Action:** Please ensure the backend server is running and the API key is configured correctly.`);
     } finally {
       setIsLoadingAi(false);
+      setAnalyzingQueryId(null);
     }
   };
 
-  const handleAnalyzeQuery = (q) => {
-    const prompt = `Analyze search performance and optimization strategy for keyword: "${q}"`;
+  const handleAnalyzeQuery = (query) => {
+    const prompt = `Analyze search performance and optimization strategy for keyword: "${query.query}"`;
     setQueryPrompt(prompt);
     setActiveTab('insights');
+    setAnalyzingQueryId(query.id);
     handleGenerateInsight(prompt);
   };
 
@@ -151,7 +154,7 @@ const App = () => {
             <PerformanceChart timeline={PERFORMANCE_TIMELINE} selectedMetric={selectedMetric} setSelectedMetric={setSelectedMetric} />
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2">
-                <QueriesTable queries={INITIAL_QUERIES} onAnalyzeQuery={handleAnalyzeQuery} />
+                <QueriesTable queries={INITIAL_QUERIES} onAnalyzeQuery={handleAnalyzeQuery} analyzingQueryId={analyzingQueryId} />
               </div>
               <div>
                 <UrlInspection />
@@ -162,7 +165,7 @@ const App = () => {
 
         {activeTab === 'queries' && (
           <div className="max-w-7xl mx-auto">
-            <QueriesTable queries={INITIAL_QUERIES} onAnalyzeQuery={handleAnalyzeQuery} />
+            <QueriesTable queries={INITIAL_QUERIES} onAnalyzeQuery={handleAnalyzeQuery} analyzingQueryId={analyzingQueryId} />
           </div>
         )}
 
