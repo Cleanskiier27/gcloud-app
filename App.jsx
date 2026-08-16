@@ -7,6 +7,7 @@ import QueriesTable from './components/QueriesTable';
 import UrlInspection from './components/UrlInspection';
 import GeminiInsightsLab from './components/GeminiInsightsLab';
 import { LayoutDashboard, Search, Sparkles, BarChart2, BrainCircuit } from 'lucide-react';
+import { useGemini } from './hooks/useGemini'; // Assuming you create this file
 
 const App = () => {
   // Overlays state
@@ -36,9 +37,8 @@ const App = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   // Gemini Prompt & AI Output state
+  const { aiResponse, isLoadingAi, generateInsight, setAiResponse } = useGemini();
   const [queryPrompt, setQueryPrompt] = useState('');
-  const [aiResponse, setAiResponse] = useState('');
-  const [isLoadingAi, setIsLoadingAi] = useState(false);
   const [analyzingQueryId, setAnalyzingQueryId] = useState(null);
 
   // Realtime Simulation Timer
@@ -68,40 +68,9 @@ const App = () => {
     }, 2500);
   };
 
-  // Call Gemini API via fetch
   const handleGenerateInsight = async (prompt) => {
-    if (!prompt.trim()) return;
-    setIsLoadingAi(true);
-    setAiResponse('');
-
-    try {
-      const response = await fetch('http://localhost:3001/api/generate-insight', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ prompt }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'An unknown error occurred.');
-      }
-
-      const data = await response.json();
-      const resultText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-
-      if (resultText) {
-        setAiResponse(resultText);
-      } else {
-        setAiResponse("Unable to retrieve Gemini AI insights. Standard telemetry active.");
-      }
-    } catch (err) {
-      setAiResponse(`**Error:** Could not connect to the AGI service. \n\n* **Details:** ${err.message}\n* **Action:** Please ensure the backend server is running and the API key is configured correctly.`);
-    } finally {
-      setIsLoadingAi(false);
-      setAnalyzingQueryId(null);
-    }
+    await generateInsight(prompt);
+    setAnalyzingQueryId(null); // Reset the specific query loading state
   };
 
   const handleAnalyzeQuery = (query) => {
@@ -109,7 +78,7 @@ const App = () => {
     setQueryPrompt(prompt);
     setActiveTab('insights');
     setAnalyzingQueryId(query.id);
-    handleGenerateInsight(prompt);
+    generateInsight(prompt);
   };
 
   return (

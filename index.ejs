@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Chrome OS Dashboard</title>
+    <link rel="stylesheet" href="/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <header>
+        <div class="logo">
+            <div class="logo-icon">OS</div>
+            <h1>Chrome OS - Simple Dashboard</h1>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <!-- AGI Lab Section -->
+            <div class="card">
+                <h2>AGI Search Optimization Lab</h2>
+                <p class="subtitle">Run direct queries for search architecture recommendations.</p>
+                <form id="insight-form" class="insight-form">
+                    <input 
+                        id="prompt-input"
+                        type="text" 
+                        name="prompt" 
+                        placeholder="e.g., How can we increase CTR on developer tools queries?"
+                        required
+                    >
+                    <button id="generate-button" type="submit">Generate</button>
+                </form>
+                <div id="response-container"></div>
+            </div>
+
+            <!-- Queries Table Section -->
+            <div class="card">
+                <h2>Top Search Queries</h2>
+                <p class="subtitle">Keywords ranked by organic performance.</p>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Query Keyword</th>
+                                <th class="text-right">Clicks</th>
+                                <th class="text-right">Impressions</th>
+                                <th class="text-right">CTR</th>
+                                <th class="text-right">Position</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% queries.forEach(q => { %>
+                                <tr>
+                                    <td class="font-mono"><%= q.query %></td>
+                                    <td class="text-right font-mono"><%= q.clicks.toLocaleString() %></td>
+                                    <td class="text-right font-mono"><%= q.impressions.toLocaleString() %></td>
+                                    <td class="text-right font-mono"><%= (q.ctr * 100).toFixed(2) %>%</td>
+                                    <td class="text-right font-mono"><%= q.position.toFixed(1) %></td>
+                                </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="/script.js"></script>
+
+</body>
+</html>
